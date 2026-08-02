@@ -13,7 +13,7 @@ Essas contas, chaves e qualquer console externo não são criados por este repos
 1. No Alexa Developer Console, crie uma skill do tipo **Custom** e **Alexa-hosted (Python)**, em pt-BR.
 2. Use um nome de invocação de duas ou mais palavras que seja aceito pelo console. Se necessário, altere `models/pt-BR.json` e documente a alteração em uma nova release.
 3. Importe `models/pt-BR.json` pelo JSON Editor. Caso `AMAZON.FallbackIntent` não esteja disponível no locale, remova apenas essa intent e seu handler correspondente.
-4. Faça o build do modelo. A utterance de primeiro turno sempre contém uma carrier phrase; o slot sozinho existe somente dentro da configuração de diálogo.
+4. Faça o build do modelo. Cada pergunta deve usar uma carrier phrase, como `pergunte {pergunta}`.
 5. No editor Code da skill hospedada, copie os arquivos de `lambda/` e o conteúdo de `requirements.txt` para a raiz do projeto Lambda.
 6. Faça o deploy pelo próprio console.
 

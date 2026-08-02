@@ -2,6 +2,19 @@
 
 Este projeto segue [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [0.1.2] - 2026-08-02
+
+### Corrigido
+
+- Removidas as diretivas `Dialog.ElicitSlot`, rejeitadas pelo endpoint Alexa-hosted neste fluxo com `AMAZON.SearchQuery`.
+- Fluxo de conversa ajustado para usar a frase portadora `pergunte {pergunta}` em cada turno.
+- Carregamento do runtime de LLM adiado para a pergunta, preservando a abertura da skill se uma dependência estiver indisponível.
+
+### Validado
+
+- Resposta de `LaunchRequest` não inclui diretivas de diálogo e mantém a sessão aberta.
+- Falhas de configuração ou dependência do LLM retornam uma mensagem controlada, sem resposta Alexa inválida.
+
 ## [0.1.1] - 2026-08-02
 
 ### Corrigido
