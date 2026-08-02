@@ -122,7 +122,12 @@ def _resposta_de_pergunta(evento: Mapping[str, Any]) -> dict[str, Any]:
             )
             atributos["historico"] = historico[-MAX_MENSAGENS:]
     except Exception as erro:
-        logger.error("Falha no runtime de inferência tipo=%s", type(erro).__name__)
+        detalhe = (
+            str(erro)
+            if type(erro).__name__ == "ProvedorIndisponivel"
+            else type(erro).__name__
+        )
+        logger.error("Falha no runtime de inferência detalhe=%s", detalhe)
         texto = "Não consegui falar com o modelo agora. Tenta de novo?"
 
     logger.info("Turno concluído duracao_s=%.2f", time.monotonic() - inicio)

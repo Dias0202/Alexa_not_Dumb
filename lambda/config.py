@@ -8,8 +8,6 @@ from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
-import boto3
-
 CHAVE_CONFIG = "config/llm.json"
 CAMINHO_CONFIG_LOCAL = Path(__file__).parent / CHAVE_CONFIG
 PROVEDORES_SUPORTADOS = frozenset({"groq", "gemini", "local"})
@@ -80,6 +78,8 @@ def carregar() -> dict[str, Any]:
         raise ConfiguracaoErro("bucket de configuração não disponível")
 
     try:
+        import boto3
+
         cliente = boto3.client("s3")
         objeto = cliente.get_object(Bucket=bucket, Key=CHAVE_CONFIG)
         conteudo = objeto["Body"].read().decode("utf-8")

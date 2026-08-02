@@ -13,8 +13,8 @@ flowchart LR
     Echo["Echo"] --> Alexa["Alexa: ASR, NLU e TTS"]
     Alexa --> Skill["Skill Alexa-hosted"]
     Skill --> Router["Roteador com prazo"]
-    Router --> Groq["Groq"]
     Router --> Gemini["Gemini"]
+    Router -. fallback opcional .-> Groq["Groq"]
     Router --> Proxy["Proxy autenticado opcional"]
     Proxy --> Ollama["Ollama local"]
     Skill --> Session["Atributos de sessao"]
@@ -45,7 +45,7 @@ pytest
 ruff check .
 ```
 
-O código em `lambda/` é carregado pelo runtime Alexa-hosted. Os testes adicionam esse diretório ao `sys.path` apenas para execução local.
+O código em `lambda/` é carregado pelo runtime Alexa-hosted, atualmente Python 3.8. Os testes adicionam esse diretório ao `sys.path` apenas para execução local. Tipos avaliados durante a importação devem usar `typing`, e não genéricos de `collections.abc` incompatíveis com esse runtime.
 
 ## Configuração e segredos
 
@@ -69,6 +69,8 @@ Após invocar a skill, diga uma das frases iniciais, por exemplo: “pergunte qu
 - A trilha Ollama é opcional, pode exceder o prazo e exige proxy autenticado mais Tailscale Funnel. Nunca exponha a porta 11434 diretamente.
 - A resposta da Lambda foi validada no teste manual do console; o teste de voz no simulador e em Echo físico ainda depende da disponibilidade dos respectivos controles e dispositivo.
 - Como contingência para falha do painel S3, a configuração ativa está no repositório privado Alexa-hosted. Mova-a para S3 e rotacione as chaves quando o painel voltar a funcionar.
+- Gemini é o provedor ativo da configuração de desenvolvimento. Groq retornou HTTP 403 na validação direta e foi removido da ordem até que a conta esteja autorizada.
+- O alerta de `cloudwatch:GetMetricData` no painel de métricas do CloudWatch não impede a execução da Lambda nem a consulta de eventos de log; ele só limita a visualização daquele painel para a função SSO atual.
 
 ## Versionamento local
 
@@ -80,3 +82,4 @@ O fluxo usa `main` para versões estáveis, `develop` para integração e branch
 - [SDD](Memory/SDD-assistente-alexa-llm.md)
 - [Implantação](docs/implantacao.md)
 - [Validação manual](docs/validacao-manual.md)
+- [Diagnóstico e troubleshooting](docs/troubleshooting.md)

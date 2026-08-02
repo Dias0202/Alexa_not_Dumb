@@ -7,8 +7,7 @@ import logging
 import time
 import urllib.error
 import urllib.request
-from collections.abc import Callable, Mapping, Sequence
-from typing import Any
+from typing import Any, Callable, Mapping, Sequence  # noqa: UP035
 
 import config
 
@@ -137,11 +136,12 @@ def gerar(mensagens: Sequence[Mensagem], prazo_total: float = PRAZO_TOTAL) -> st
     """Executa a fila configurada sem vazar prompts, chaves ou URLs em log."""
     configuracao = config.carregar()
     inicio = time.monotonic()
-    ultimo_erro: Exception | None = None
+    ultimo_motivo = "prazo_esgotado"
 
     for nome in configuracao["ordem"]:
         restante = prazo_total - (time.monotonic() - inicio)
         if restante < PRAZO_MINIMO:
+            ultimo_motivo = f"{nome}:prazo_esgotado"
             logger.warning("Prazo esgotado antes de tentar provedor=%s", nome)
             break
 
@@ -159,15 +159,14 @@ def gerar(mensagens: Sequence[Mensagem], prazo_total: float = PRAZO_TOTAL) -> st
             )
             return texto.strip()
         except urllib.error.HTTPError as erro:
-            ultimo_erro = erro
+            ultimo_motivo = f"{nome}:http_{erro.code}"
             logger.warning(
                 "Provedor respondeu com erro provedor=%s status=%s", nome, erro.code
             )
         except Exception as erro:
-            ultimo_erro = erro
+            ultimo_motivo = f"{nome}:{type(erro).__name__}"
             logger.warning(
                 "Provedor falhou provedor=%s tipo=%s", nome, type(erro).__name__
             )
 
-    motivo = type(ultimo_erro).__name__ if ultimo_erro else "prazo_esgotado"
-    raise ProvedorIndisponivel(f"nenhum provedor respondeu ({motivo})")
+    raise ProvedorIndisponivel(f"nenhum provedor respondeu ({ultimo_motivo})")

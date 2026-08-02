@@ -56,7 +56,7 @@ def test_gerar_informa_indisponibilidade_quando_todos_falham(
         llm.PROVEDORES, "groq", lambda *_args: (_ for _ in ()).throw(OSError())
     )
 
-    with pytest.raises(llm.ProvedorIndisponivel):
+    with pytest.raises(llm.ProvedorIndisponivel, match="groq:OSError"):
         llm.gerar(MENSAGENS)
 
 

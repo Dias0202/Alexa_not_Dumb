@@ -17,6 +17,12 @@ Essas contas, chaves e qualquer console externo não são criados por este repos
 5. No editor Code da skill hospedada, copie os arquivos de `lambda/` e o conteúdo de `requirements.txt` para a raiz do projeto Lambda.
 6. Faça o deploy pelo próprio console.
 
+### Compatibilidade do runtime
+
+O runtime Alexa-hosted usado por esta skill é Python 3.8. Mantenha os aliases de tipos importados de `typing`; `collections.abc.Mapping[str, ...]` e similares falham durante a importação nesse runtime.
+
+Depois de salvar as alterações, use **Save** e **Deploy** no editor. O teste pelo Echo deve usar a skill de desenvolvimento habilitada na mesma conta Amazon que possui o projeto: Alexa app > Skills e jogos > Suas skills > Skills de desenvolvimento. Uma versão em desenvolvimento não é promovida automaticamente para o endpoint Live.
+
 ## Configuração no bucket da skill
 
 1. Copie `config/llm.example.json` para um arquivo temporário fora do Git.
@@ -49,3 +55,9 @@ Execute o comando a partir de `local_proxy/`. O proxy só escuta em loopback. Pu
 - Modelo: restaure o JSON da release anterior e reconstrua o interaction model.
 
 O rollback não é automático. Valide sempre o caminho de voz após uma alteração no console.
+
+## Logs e diagnóstico
+
+Abra **Code > CloudWatch Logs** no console da skill e procure a execução mais recente. O handler registra apenas motivos seguros para falhas de provedor, como `gemini:http_403` ou `gemini:URLError`; nunca copie chaves ou o conteúdo de `config/llm.json` para logs ou tickets.
+
+Se o console mostrar que a função SSO não tem `cloudwatch:GetMetricData`, trate isso como limitação da tela de métricas. Esse aviso não bloqueia o deploy, a execução da Lambda ou a leitura dos eventos de log acessíveis pelo console da skill.

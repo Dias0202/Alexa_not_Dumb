@@ -18,6 +18,9 @@ Os testes automatizados cobrem a lógica local. Os itens abaixo dependem do Alex
 | T-12 | Não responder ao reprompt | Alexa encerra normalmente | Transcript |
 | T-13 | Chamar proxy sem header | HTTP 401 | Código HTTP |
 | T-14 | Chamar proxy com token válido | Resposta do Ollama | Código HTTP e duração |
+| T-15 | Executar uma pergunta no Echo depois do deploy | Resposta do provedor ativo, sem a mensagem de indisponibilidade | Transcript e evento CloudWatch do mesmo horário |
+| T-16 | Consultar o evento de uma falha de provedor | Motivo seguro, como `gemini:http_403` ou `gemini:URLError`, sem segredos | Linha do CloudWatch sem chaves, URL ou pergunta |
+| T-17 | Abrir a skill no Echo vinculado à conta de desenvolvimento | A skill Development recebe a invocação | Transcript e evento no grupo `/aws/lambda/<skill-id>` |
 
 ## Critérios de aceite que dependem de operação real
 
@@ -28,3 +31,10 @@ Os testes automatizados cobrem a lógica local. Os itens abaixo dependem do Alex
 - CA-06 a CA-09: encerramento, erro compreensível, ausência de marcação em fala e Echo físico.
 
 Registre datas, provedor ativo, duração e resultado; não registre perguntas, respostas integrais, chaves ou tokens.
+
+## Evidências operacionais desta correção
+
+- O runtime Alexa-hosted foi identificado como Python 3.8.
+- A falha de importação `TypeError: 'ABCMeta' object is not subscriptable` foi corrigida usando os tipos de `typing` em `lambda/llm.py`.
+- A Gemini foi validada com uma pergunta real e a resposta passou pelo handler local da Alexa.
+- A credencial Groq retornou HTTP 403 e foi removida da fila ativa; ela só deve voltar após rotação e validação da credencial.

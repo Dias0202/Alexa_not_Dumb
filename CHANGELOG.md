@@ -2,6 +2,19 @@
 
 Este projeto segue [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [Unreleased]
+
+### Corrigido
+
+- Compatibilidade do roteador de LLM com o runtime Python 3.8 da Alexa-hosted: aliases de tipo avaliados na importação agora usam `typing`.
+- Carregamento de `boto3` adiado para o caminho S3, evitando dependência desnecessária quando a configuração privada local está disponível.
+- Diagnóstico de indisponibilidade do provedor agora preserva somente causa segura, como provedor, status HTTP ou tipo de erro.
+
+### Alterado
+
+- Gemini passa a ser o único provedor ativo até que a credencial Groq seja rotacionada e validada; a credencial anterior retornou HTTP 403.
+- Documentados o deploy Development, o teste em Dev Skills e o aviso não bloqueante de permissão de métricas do CloudWatch.
+
 ## [0.1.2] - 2026-08-02
 
 ### Corrigido
