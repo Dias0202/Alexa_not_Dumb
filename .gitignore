@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# Configuracoes locais e segredos
+.env
+.env.*
+!/.env.example
+config/llm.json
+config/*.local.json
+
+# Artefatos locais
+coverage.xml
+htmlcov/
+dist/
+build/
+*.egg-info/

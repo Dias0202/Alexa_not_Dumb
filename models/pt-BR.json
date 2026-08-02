@@ -1,0 +1,58 @@
+{
+  "interactionModel": {
+    "languageModel": {
+      "invocationName": "meu assistente",
+      "intents": [
+        {
+          "name": "PerguntaIntent",
+          "slots": [
+            {"name": "pergunta", "type": "AMAZON.SearchQuery"}
+          ],
+          "samples": [
+            "pergunte {pergunta}",
+            "me diga {pergunta}",
+            "me explique {pergunta}",
+            "quero saber {pergunta}",
+            "responda {pergunta}",
+            "sobre {pergunta}",
+            "o que você acha de {pergunta}"
+          ]
+        },
+        {"name": "AMAZON.StopIntent", "samples": []},
+        {"name": "AMAZON.CancelIntent", "samples": []},
+        {"name": "AMAZON.HelpIntent", "samples": []},
+        {"name": "AMAZON.FallbackIntent", "samples": []}
+      ],
+      "types": []
+    },
+    "dialog": {
+      "delegationStrategy": "SKILL_RESPONSE",
+      "intents": [
+        {
+          "name": "PerguntaIntent",
+          "confirmationRequired": false,
+          "prompts": {},
+          "slots": [
+            {
+              "name": "pergunta",
+              "type": "AMAZON.SearchQuery",
+              "confirmationRequired": false,
+              "elicitationRequired": true,
+              "prompts": {"elicitation": "Elicit.Slot.Pergunta"},
+              "samples": ["{pergunta}"]
+            }
+          ]
+        }
+      ]
+    },
+    "prompts": [
+      {
+        "id": "Elicit.Slot.Pergunta",
+        "variations": [
+          {"type": "PlainText", "value": "O que você quer saber?"},
+          {"type": "PlainText", "value": "Pode perguntar."}
+        ]
+      }
+    ]
+  }
+}

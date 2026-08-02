@@ -1,0 +1,17 @@
+{
+  "ordem": ["groq", "gemini"],
+  "perfil": "O usuario prefere respostas diretas e objetivas.",
+  "groq": {
+    "api_key": "COLE_A_CHAVE_DO_GROQ_AQUI",
+    "modelo": "llama-3.3-70b-versatile"
+  },
+  "gemini": {
+    "api_key": "COLE_A_CHAVE_DO_GEMINI_AQUI",
+    "modelo": "gemini-2.5-flash"
+  },
+  "local": {
+    "url": "https://sua-maquina.seu-tailnet.ts.net",
+    "token": "TOKEN_LONGO_ALEATORIO",
+    "modelo": "llama3.1:8b"
+  }
+}
