@@ -14,7 +14,7 @@ Essas contas, chaves e qualquer console externo não são criados por este repos
 2. Use um nome de invocação de duas ou mais palavras que seja aceito pelo console. Se necessário, altere `models/pt-BR.json` e documente a alteração em uma nova release.
 3. Importe `models/pt-BR.json` pelo JSON Editor. Caso `AMAZON.FallbackIntent` não esteja disponível no locale, remova apenas essa intent e seu handler correspondente.
 4. Faça o build do modelo. A utterance de primeiro turno sempre contém uma carrier phrase; o slot sozinho existe somente dentro da configuração de diálogo.
-5. No editor Code da skill hospedada, copie os quatro arquivos de `lambda/` e o conteúdo de `requirements.txt` para a raiz do projeto Lambda.
+5. No editor Code da skill hospedada, copie os arquivos de `lambda/` e o conteúdo de `requirements.txt` para a raiz do projeto Lambda.
 6. Faça o deploy pelo próprio console.
 
 ## Configuração no bucket da skill
@@ -23,6 +23,10 @@ Essas contas, chaves e qualquer console externo não são criados por este repos
 2. Preencha ao menos um provedor e mantenha em `ordem` apenas provedores completos.
 3. Envie o arquivo para `config/llm.json` no bucket S3 provisionado para a skill.
 4. Não registre ou imprima o conteúdo. A aplicação mantém o objeto em cache por container; uma rotação de chave pode exigir aguardar novo container ou redeploy para invalidar o cache imediatamente.
+
+### Contingência para indisponibilidade do console S3
+
+Quando o painel S3 da Alexa-hosted falhar, importe o arquivo como `lambda/config/llm.json` apenas no repositório privado hospedado da skill. O carregador prioriza esse arquivo e usa S3 quando ele não existe. Essa contingência não deve ser versionada no repositório GitHub. Assim que o painel S3 estiver disponível, mova o arquivo para o bucket, remova-o do repositório hospedado e rotacione as chaves.
 
 ## Proxy Ollama opcional
 

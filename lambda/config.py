@@ -5,11 +5,13 @@ from __future__ import annotations
 import json
 import os
 from collections.abc import Mapping
+from pathlib import Path
 from typing import Any
 
 import boto3
 
 CHAVE_CONFIG = "config/llm.json"
+CAMINHO_CONFIG_LOCAL = Path(__file__).parent / CHAVE_CONFIG
 PROVEDORES_SUPORTADOS = frozenset({"groq", "gemini", "local"})
 _cache: dict[str, Any] | None = None
 
@@ -58,10 +60,20 @@ def validar(configuracao: object) -> dict[str, Any]:
 
 
 def carregar() -> dict[str, Any]:
-    """Lê a configuração uma vez por container e a mantém em cache."""
+    """Lê a configuração local ou do S3 uma vez por container e a mantém em cache."""
     global _cache
     if _cache is not None:
         return _cache
+
+    if CAMINHO_CONFIG_LOCAL.is_file():
+        try:
+            conteudo_local = CAMINHO_CONFIG_LOCAL.read_text(encoding="utf-8")
+            _cache = validar(json.loads(conteudo_local))
+            return _cache
+        except (OSError, UnicodeDecodeError, json.JSONDecodeError) as erro:
+            raise ConfiguracaoErro(
+                "não foi possível interpretar a configuração local"
+            ) from erro
 
     bucket = os.environ.get("S3_PERSISTENCE_BUCKET")
     if not bucket:

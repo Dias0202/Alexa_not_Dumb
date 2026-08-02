@@ -4,7 +4,7 @@ Skill Alexa-hosted, em pt-BR, que usa a Alexa para voz e um LLM para gerar respo
 
 ## Estado da versão
 
-A versão atual é `0.1.0` (MVP implementado e testado localmente). O deploy no Alexa Developer Console, a criação das contas dos provedores e a validação em um Echo são etapas manuais e ainda não podem ser confirmadas sem as respectivas credenciais e dispositivo.
+A versão atual é `0.1.1`. A skill Alexa-hosted em pt-BR foi implantada no Alexa Developer Console e o endpoint remoto respondeu com sucesso a um `LaunchRequest` manual. O teste de voz em Echo físico continua pendente.
 
 ## Arquitetura
 
@@ -52,9 +52,9 @@ O código em `lambda/` é carregado pelo runtime Alexa-hosted. Os testes adicion
 1. Crie uma skill **Alexa-hosted (Python)** no Alexa Developer Console, locale pt-BR.
 2. Importe `models/pt-BR.json` na aba **Build > Interaction Model > JSON Editor** e construa o modelo.
 3. Copie os arquivos de `lambda/` para o repositório hospedado da skill, preservando os nomes na raiz do código Lambda.
-4. Copie `config/llm.example.json`, preencha as chaves e envie o resultado como `config/llm.json` para o bucket S3 provisionado pela skill.
+4. Copie `config/llm.example.json`, preencha as chaves e envie o resultado como `config/llm.json` para o bucket S3 provisionado pela skill. Se o painel S3 da Alexa-hosted estiver indisponível, use `lambda/config/llm.json` apenas no repositório privado hospedado da skill; nunca o envie ao GitHub.
 
-O arquivo real `config/llm.json` é ignorado pelo Git. Nunca coloque chaves em `lambda/`, no histórico Git ou em logs. Veja o procedimento completo em [docs/implantacao.md](docs/implantacao.md).
+O arquivo real `config/llm.json` é ignorado pelo Git. Nunca coloque chaves no repositório Git, no histórico Git ou em logs. O caminho `lambda/config/llm.json` é exclusivamente a contingência para o repositório privado Alexa-hosted. Veja o procedimento completo em [docs/implantacao.md](docs/implantacao.md).
 
 ## Uso
 
@@ -67,11 +67,12 @@ Após invocar a skill, diga uma das frases iniciais, por exemplo: “pergunte qu
 - A memória é apenas da sessão atual; não há retenção entre sessões nesta versão.
 - Free tiers, políticas de provedores e compatibilidade de modelos mudam. Revise limites antes do deploy.
 - A trilha Ollama é opcional, pode exceder o prazo e exige proxy autenticado mais Tailscale Funnel. Nunca exponha a porta 11434 diretamente.
-- O teste no simulador e no Echo, bem como o envio do objeto S3 com segredos, exigem ações no console e não foram automatizados por segurança.
+- A resposta da Lambda foi validada no teste manual do console; o teste de voz no simulador e em Echo físico ainda depende da disponibilidade dos respectivos controles e dispositivo.
+- Como contingência para falha do painel S3, a configuração ativa está no repositório privado Alexa-hosted. Mova-a para S3 e rotacione as chaves quando o painel voltar a funcionar.
 
 ## Versionamento local
 
-O fluxo local usa `main` para versões estáveis e `develop` para integração. As versões estão registradas em `VERSION`, `CHANGELOG.md` e `docs/releases/`. Nenhum remoto é configurado ou recebe push nesta etapa.
+O fluxo usa `main` para versões estáveis, `develop` para integração e branches `fix/*` para correções isoladas. As versões estão registradas em `VERSION`, `CHANGELOG.md` e `docs/releases/`.
 
 ## Documentos de referência
 
