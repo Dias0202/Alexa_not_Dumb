@@ -24,35 +24,6 @@
         {"name": "AMAZON.FallbackIntent", "samples": []}
       ],
       "types": []
-    },
-    "dialog": {
-      "delegationStrategy": "SKILL_RESPONSE",
-      "intents": [
-        {
-          "name": "PerguntaIntent",
-          "confirmationRequired": false,
-          "prompts": {},
-          "slots": [
-            {
-              "name": "pergunta",
-              "type": "AMAZON.SearchQuery",
-              "confirmationRequired": false,
-              "elicitationRequired": true,
-              "prompts": {"elicitation": "Elicit.Slot.Pergunta"},
-              "samples": ["{pergunta}"]
-            }
-          ]
-        }
-      ]
-    },
-    "prompts": [
-      {
-        "id": "Elicit.Slot.Pergunta",
-        "variations": [
-          {"type": "PlainText", "value": "O que você quer saber?"},
-          {"type": "PlainText", "value": "Pode perguntar."}
-        ]
-      }
-    ]
+    }
   }
 }

@@ -6,7 +6,7 @@ Os testes automatizados cobrem a lógica local. Os itens abaixo dependem do Alex
 |---|---|---|---|
 | T-01 | Construir o modelo no console | Sem erro de carrier phrase | Captura de tela/data do build |
 | T-02 | Invocar com “pergunte ...” | Slot recebe toda a pergunta | Transcript do simulador |
-| T-03 | Responder sem carrier phrase depois do primeiro turno | Próxima fala entra no slot, sem repetir a anterior | Transcript de três turnos |
+| T-03 | Responder com nova carrier phrase depois do primeiro turno | Próxima fala entra no slot sem erro de resposta inválida | Transcript de três turnos |
 | T-04 | Fazer pergunta e “e por quê?” | Resposta considera o turno anterior | Transcript da sessão |
 | T-05 | Realizar seis turnos | Histórico fica limitado e o diálogo continua | Log sem conteúdo da pergunta |
 | T-06 | Invalidar temporariamente a chave primária | Provedor seguinte responde; WARNING sem segredo | Log com provedor/status |
