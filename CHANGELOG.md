@@ -2,6 +2,18 @@
 
 Este projeto segue [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [0.1.1] - 2026-08-02
+
+### Corrigido
+
+- Configuração local privada como contingência para indisponibilidade do painel S3 da Alexa-hosted.
+- Documentação de implantação, segredos, versionamento e limitações da validação remota.
+
+### Validado
+
+- Modelo de interação compilado no Alexa Developer Console.
+- `LaunchRequest` manual executado com status `SUCCESSFUL` contra a Lambda Alexa-hosted em `us-west-2`.
+
 ## [0.1.0] - 2026-08-02
 
 ### Adicionado
