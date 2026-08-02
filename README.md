@@ -4,7 +4,7 @@ Skill Alexa-hosted, em pt-BR, que usa a Alexa para voz e um LLM para gerar respo
 
 ## Estado da versão
 
-A versão atual é `0.1.1`. A skill Alexa-hosted em pt-BR foi implantada no Alexa Developer Console e o endpoint remoto respondeu com sucesso a um `LaunchRequest` manual. O teste de voz em Echo físico continua pendente.
+A versão atual é `0.1.2`. A skill Alexa-hosted em pt-BR foi implantada no Alexa Developer Console com respostas padrão da Alexa, sem diretivas de diálogo incompatíveis. O teste de voz deve ser repetido após o deploy desta versão.
 
 ## Arquitetura
 
@@ -58,11 +58,11 @@ O arquivo real `config/llm.json` é ignorado pelo Git. Nunca coloque chaves no r
 
 ## Uso
 
-Após invocar a skill, diga uma das frases iniciais, por exemplo: “pergunte qual a capital de Minas Gerais”. Nos turnos seguintes, a diretiva de elicitação captura a próxima fala livremente. Diga “para” ou “cancela” para encerrar.
+Após invocar a skill, diga uma das frases iniciais, por exemplo: “pergunte qual a capital de Minas Gerais”. Em cada novo turno, use novamente uma frase inicial como “pergunte ...”. Diga “para” ou “cancela” para encerrar.
 
 ## Limitações conhecidas
 
-- A Alexa exige uma frase portadora no primeiro turno; captura totalmente livre só ocorre após a elicitação do slot.
+- A Alexa exige uma frase portadora em cada turno. Essa escolha elimina a diretiva de diálogo que o endpoint Alexa-hosted rejeitou no Echo.
 - O orçamento rígido de oito segundos é externo à aplicação. Provedores lentos, cold start ou rede podem levar à mensagem controlada de indisponibilidade.
 - A memória é apenas da sessão atual; não há retenção entre sessões nesta versão.
 - Free tiers, políticas de provedores e compatibilidade de modelos mudam. Revise limites antes do deploy.

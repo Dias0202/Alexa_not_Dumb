@@ -3,12 +3,40 @@ from __future__ import annotations
 import lambda_function
 
 
-def test_elicitacao_limpa_o_slot_da_pergunta() -> None:
-    diretiva = lambda_function.elicitar()
+def test_lancamento_nao_envia_diretiva_de_dialogo() -> None:
+    evento = {
+        "version": "1.0",
+        "session": {
+            "new": True,
+            "sessionId": "SessionId.teste",
+            "application": {"applicationId": "amzn1.ask.skill.teste"},
+            "user": {"userId": "amzn1.ask.account.teste"},
+        },
+        "context": {
+            "System": {
+                "application": {"applicationId": "amzn1.ask.skill.teste"},
+                "user": {"userId": "amzn1.ask.account.teste"},
+                "device": {"deviceId": "dispositivo.teste", "supportedInterfaces": {}},
+                "apiEndpoint": "https://api.amazonalexa.com",
+                "apiAccessToken": "",
+            }
+        },
+        "request": {
+            "type": "LaunchRequest",
+            "requestId": "EdwRequestId.teste",
+            "timestamp": "2026-08-02T17:30:00Z",
+            "locale": "pt-BR",
+        },
+    }
 
-    assert diretiva.slot_to_elicit == "pergunta"
-    assert diretiva.updated_intent.name == "PerguntaIntent"
-    assert diretiva.updated_intent.slots == {}
+    resposta = lambda_function.lambda_handler(evento, None)
+
+    assert resposta["response"].get("directives", []) == []
+    assert resposta["response"]["shouldEndSession"] is False
+    assert resposta["response"]["outputSpeech"] == {
+        "type": "PlainText",
+        "text": "Oi. Para perguntar, diga: pergunte, e a sua pergunta.",
+    }
 
 
 def test_historico_descarta_itens_malformados_e_limita_tamanho() -> None:
