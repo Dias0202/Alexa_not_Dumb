@@ -50,3 +50,21 @@ def test_validar_exige_https_para_provedor_local() -> None:
 
     with pytest.raises(config.ConfiguracaoErro, match="HTTPS"):
         config.validar(dados)
+
+
+def test_carregar_prioriza_arquivo_local_antes_do_s3(
+    monkeypatch: pytest.MonkeyPatch, tmp_path
+) -> None:
+    caminho = tmp_path / "config" / "llm.json"
+    caminho.parent.mkdir()
+    caminho.write_text(
+        '{"ordem":["groq"],"perfil":"","groq":{"api_key":"chave","modelo":"modelo"}}',
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(config, "CAMINHO_CONFIG_LOCAL", caminho)
+    monkeypatch.delenv("S3_PERSISTENCE_BUCKET", raising=False)
+    config.limpar_cache()
+
+    assert config.carregar()["ordem"] == ["groq"]
+
+    config.limpar_cache()
