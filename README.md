@@ -1,40 +1,60 @@
-# Assistente Conversacional Alexa com LLM
+# Alexa Conversational Assistant with an LLM
 
-Skill Alexa-hosted, em pt-BR, que usa a Alexa para voz e um LLM para gerar respostas conversacionais. O backend foi desenhado para operar sem custo recorrente, usando provedores configuráveis de free tier e fallback em cadeia.
+**English** · [Português](README.pt-BR.md)
 
-## Estado da versão
+An Alexa-hosted skill in Brazilian Portuguese that uses Alexa for speech (ASR, NLU and TTS)
+and a large language model to generate conversational answers. The backend is designed to run
+with no recurring cost, using configurable free-tier providers with a fallback chain.
 
-A versão atual é `0.1.2`. A skill Alexa-hosted em pt-BR foi implantada no Alexa Developer Console com respostas padrão da Alexa, sem diretivas de diálogo incompatíveis. O teste de voz deve ser repetido após o deploy desta versão.
+## Release status
 
-## Arquitetura
+The current version is `0.1.2`. The pt-BR Alexa-hosted skill is deployed in the Alexa
+Developer Console with standard Alexa responses and no dialog directives (the hosted endpoint
+rejected them on a physical Echo). The voice test must be repeated after deploying this version.
+
+## Architecture
 
 ```mermaid
 flowchart LR
-    Echo["Echo"] --> Alexa["Alexa: ASR, NLU e TTS"]
-    Alexa --> Skill["Skill Alexa-hosted"]
-    Skill --> Router["Roteador com prazo"]
+    Echo["Echo"] --> Alexa["Alexa: ASR, NLU and TTS"]
+    Alexa --> Skill["Alexa-hosted skill"]
+    Skill --> Router["Deadline-aware router"]
     Router --> Gemini["Gemini"]
-    Router -. fallback opcional .-> Groq["Groq"]
-    Router --> Proxy["Proxy autenticado opcional"]
-    Proxy --> Ollama["Ollama local"]
-    Skill --> Session["Atributos de sessao"]
-    Skill --> S3["Configuracao no S3"]
+    Router -. optional fallback .-> Groq["Groq"]
+    Router --> Proxy["Optional authenticated proxy"]
+    Proxy --> Ollama["Local Ollama"]
+    Skill --> Session["Session attributes"]
+    Skill --> S3["Configuration in S3"]
 ```
 
-## Estrutura
+Design points that are visible in the code:
+
+- **Hard time budget.** Alexa gives a skill about eight seconds to answer. The router in
+  `lambda/llm.py` spends at most 6 s in total and 5 s per provider, and skips a provider when
+  less than 1.5 s remains, so a slow provider degrades into a controlled "unavailable" message
+  instead of a timeout.
+- **Provider fallback chain.** Gemini, Groq and a local Ollama behind an authenticated proxy are
+  tried in the configured order.
+- **Validated configuration.** `lambda/config.py` validates the external JSON configuration
+  before use; keys live in S3, never in Git.
+- **Speech-safe output.** `lambda/voz.py` normalizes and length-limits the model output and
+  escapes it for SSML.
+
+## Repository layout
 
 ```text
-lambda/                 Backend a ser enviado para a Alexa-hosted skill
-models/                 Modelo de interação pt-BR para importar no console
-local_proxy/            Proxy FastAPI opcional para Ollama local
-config/                 Exemplo seguro da configuração externa
-tests/                  Testes unitários e de integração local
-docs/                   Guia de implantação, testes manuais e releases
+lambda/                 Backend deployed to the Alexa-hosted skill
+models/                 pt-BR interaction model to import in the console
+local_proxy/            Optional FastAPI proxy for a local Ollama
+config/                 Safe example of the external configuration
+tests/                  Unit tests and local integration tests
+docs/                   Deployment guide, manual tests and release notes
+Memory/                 Product (PDD) and design (SDD) documents, in Portuguese
 ```
 
-## Desenvolvimento local
+## Local development
 
-Requer Python 3.11 ou superior.
+Requires Python 3.11 or later.
 
 ```powershell
 py -3.11 -m venv .venv
@@ -45,41 +65,63 @@ pytest
 ruff check .
 ```
 
-O código em `lambda/` é carregado pelo runtime Alexa-hosted, atualmente Python 3.8. Os testes adicionam esse diretório ao `sys.path` apenas para execução local. Tipos avaliados durante a importação devem usar `typing`, e não genéricos de `collections.abc` incompatíveis com esse runtime.
+CI (`.github/workflows/ci.yml`) runs `ruff check` and `pytest` on Python 3.11 for every push
+and pull request.
 
-## Configuração e segredos
+The code in `lambda/` is loaded by the Alexa-hosted runtime, currently Python 3.8. Tests add
+that directory to `sys.path` only for local runs. Types evaluated at import time must use
+`typing`, not `collections.abc` generics that this runtime does not support.
 
-1. Crie uma skill **Alexa-hosted (Python)** no Alexa Developer Console, locale pt-BR.
-2. Importe `models/pt-BR.json` na aba **Build > Interaction Model > JSON Editor** e construa o modelo.
-3. Copie os arquivos de `lambda/` para o repositório hospedado da skill, preservando os nomes na raiz do código Lambda.
-4. Copie `config/llm.example.json`, preencha as chaves e envie o resultado como `config/llm.json` para o bucket S3 provisionado pela skill. Se o painel S3 da Alexa-hosted estiver indisponível, use `lambda/config/llm.json` apenas no repositório privado hospedado da skill; nunca o envie ao GitHub.
+## Configuration and secrets
 
-O arquivo real `config/llm.json` é ignorado pelo Git. Nunca coloque chaves no repositório Git, no histórico Git ou em logs. O caminho `lambda/config/llm.json` é exclusivamente a contingência para o repositório privado Alexa-hosted. Veja o procedimento completo em [docs/implantacao.md](docs/implantacao.md).
+1. Create an **Alexa-hosted (Python)** skill in the Alexa Developer Console, locale pt-BR.
+2. Import `models/pt-BR.json` under **Build > Interaction Model > JSON Editor** and build the model.
+3. Copy the files in `lambda/` to the skill's hosted repository, keeping the names at the root of
+   the Lambda code.
+4. Copy `config/llm.example.json`, fill in the keys and upload the result as `config/llm.json`
+   to the S3 bucket provisioned for the skill. If the Alexa-hosted S3 panel is unavailable, use
+   `lambda/config/llm.json` only in the skill's private hosted repository; never push it to GitHub.
 
-## Uso
+The real `config/llm.json` is ignored by Git. Never put keys in the Git repository, in Git
+history or in logs. The full procedure is in [docs/implantacao.md](docs/implantacao.md)
+(Portuguese).
 
-Após invocar a skill, diga uma das frases iniciais, por exemplo: “pergunte qual a capital de Minas Gerais”. Em cada novo turno, use novamente uma frase inicial como “pergunte ...”. Diga “para” ou “cancela” para encerrar.
+## Usage
 
-## Limitações conhecidas
+After invoking the skill, say one of the carrier phrases, for example "pergunte qual a capital
+de Minas Gerais" ("ask what the capital of Minas Gerais is"). Each new turn must start with a
+carrier phrase such as "pergunte ...". Say "para" or "cancela" to stop.
 
-- A Alexa exige uma frase portadora em cada turno. Essa escolha elimina a diretiva de diálogo que o endpoint Alexa-hosted rejeitou no Echo.
-- O orçamento rígido de oito segundos é externo à aplicação. Provedores lentos, cold start ou rede podem levar à mensagem controlada de indisponibilidade.
-- A memória é apenas da sessão atual; não há retenção entre sessões nesta versão.
-- Free tiers, políticas de provedores e compatibilidade de modelos mudam. Revise limites antes do deploy.
-- A trilha Ollama é opcional, pode exceder o prazo e exige proxy autenticado mais Tailscale Funnel. Nunca exponha a porta 11434 diretamente.
-- A resposta da Lambda foi validada no teste manual do console; o teste de voz no simulador e em Echo físico ainda depende da disponibilidade dos respectivos controles e dispositivo.
-- Como contingência para falha do painel S3, a configuração ativa está no repositório privado Alexa-hosted. Mova-a para S3 e rotacione as chaves quando o painel voltar a funcionar.
-- Gemini é o provedor ativo da configuração de desenvolvimento. Groq retornou HTTP 403 na validação direta e foi removido da ordem até que a conta esteja autorizada.
-- O alerta de `cloudwatch:GetMetricData` no painel de métricas do CloudWatch não impede a execução da Lambda nem a consulta de eventos de log; ele só limita a visualização daquele painel para a função SSO atual.
+## Known limitations
 
-## Versionamento local
+- Alexa requires a carrier phrase on every turn. This trade-off removes the dialog directive
+  that the Alexa-hosted endpoint rejected on the Echo.
+- The eight-second budget is imposed by Alexa. Slow providers, cold starts or network latency
+  can still lead to the controlled unavailability message.
+- Memory is limited to the current session; nothing is retained across sessions.
+- Free tiers, provider policies and model compatibility change. Review the limits before deploying.
+- The Ollama path is optional, can exceed the deadline and requires the authenticated proxy plus
+  Tailscale Funnel. Never expose port 11434 directly.
+- The Lambda response was validated in the console's manual test; voice tests in the simulator
+  and on a physical Echo still depend on those tools and the device being available.
+- Gemini is the active provider in the development configuration. Groq returned HTTP 403 during
+  direct validation and was removed from the order until the account is authorized.
+- There is no automated evaluation of answer quality; validation is manual
+  ([docs/validacao-manual.md](docs/validacao-manual.md)).
 
-O fluxo usa `main` para versões estáveis, `develop` para integração e branches `fix/*` para correções isoladas. As versões estão registradas em `VERSION`, `CHANGELOG.md` e `docs/releases/`.
+## Branching and versioning
 
-## Documentos de referência
+`main` holds stable releases, `develop` is the integration branch and `fix/*` branches carry
+isolated fixes. Versions are recorded in `VERSION`, `CHANGELOG.md` and `docs/releases/`.
+
+## Reference documents (Portuguese)
 
 - [PDD](Memory/PDD-assistente-alexa-llm.md)
 - [SDD](Memory/SDD-assistente-alexa-llm.md)
-- [Implantação](docs/implantacao.md)
-- [Validação manual](docs/validacao-manual.md)
-- [Diagnóstico e troubleshooting](docs/troubleshooting.md)
+- [Deployment](docs/implantacao.md)
+- [Manual validation](docs/validacao-manual.md)
+- [Troubleshooting](docs/troubleshooting.md)
+
+## License
+
+Code released under the [MIT License](LICENSE).
